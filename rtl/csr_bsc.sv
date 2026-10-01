@@ -24,6 +24,9 @@ module csr_bsc#(
     parameter PPN_WIDTH = 20,
     parameter PROGRAM_BUFFER_ADDR = 'h400,
     parameter CSR_ADDR_WIDTH = 12,
+    // Must not exceed drac_pkg::ASID_SIZE, the width actually stored in the TLB.
+    // Advertising more bits than the TLB tags makes software believe in ASIDs that
+    // alias in hardware. Overridden from top_drac.sv.
     parameter ASID_WIDTH = 13,
     parameter VMID_WIDTH = 11,
     parameter RETIRE_BW = 2,
@@ -129,6 +132,7 @@ module csr_bsc#(
     output logic                            csr_hu_o,
 
     output logic [PPN_WIDTH-1:0]            satp_ppn_o,                 // Page table base pointer for the PTW
+    output logic [ASID_WIDTH-1:0]           satp_asid_o,                // Address space ID, tags TLB entries
     output logic [PPN_WIDTH-1:0]            vsatp_ppn_o,                // Page table base pointer for the PTW
     output logic [PPN_WIDTH-1:0]            hgatp_ppn_o,                // Page table base pointer for the PTW
 
@@ -2893,6 +2897,7 @@ module csr_bsc#(
 
     // MMU outputs 
     assign satp_ppn_o       = satp_q.ppn[PPN_WIDTH-1:0];
+    assign satp_asid_o      = satp_q.asid[ASID_WIDTH-1:0];
     assign vsatp_ppn_o      = def_pkg::RVH ? vsatp_q.ppn[PPN_WIDTH-1:0] : '0;
     assign hgatp_ppn_o      = def_pkg::RVH ? hgatp_q.ppn[PPN_WIDTH-1:0] : '0;
 
